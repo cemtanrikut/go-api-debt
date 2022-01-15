@@ -10,17 +10,19 @@ import (
 	"github.com/cemtanrikut/go-api-debt/api"
 	helper "github.com/cemtanrikut/go-api-debt/helper"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type user struct {
-	name        string    `json:"name"`
-	phone       string    `json:"phone"`
-	email       string    `json:"email"`
-	avg_income  float32   `json:"avg_income"`
-	create_date time.Time `json:"create_date"`
-	update_date time.Time `json:"create_date"`
-	active      bool      `json:"active"`
+	id          primitive.ObjectID `json:"_id"`
+	name        string             `json:"name"`
+	phone       string             `json:"phone"`
+	email       string             `json:"email"`
+	avg_income  float32            `json:"avg_income"`
+	create_date time.Time          `json:"create_date"`
+	update_date time.Time          `json:"create_date"`
+	active      bool               `json:"active"`
 }
 
 func SignUp(resp http.ResponseWriter, req *http.Request, client *mongo.Client, collection *mongo.Collection) api.Response {
@@ -56,6 +58,25 @@ func GetUser(email string, resp http.ResponseWriter, req *http.Request, client *
 	var user user
 
 	userData := collection.FindOne(context.Background(), bson.M{"email": email, "active": true})
+	err := userData.Decode(&user)
+
+	if err != nil {
+		return helper.ReturnResponse(http.StatusNotFound, "", err.Error())
+	}
+
+	jsonResult, jsonError := json.Marshal(user)
+	if jsonError != nil {
+		return helper.ReturnResponse(http.StatusInternalServerError, "", err.Error())
+	}
+
+	return helper.ReturnResponse(http.StatusOK, string(jsonResult), "")
+}
+
+func GetUserById(userID string, resp http.ResponseWriter, req *http.Request, client *mongo.Client, collection *mongo.Collection) api.Response {
+	resp.Header().Set("Content-Type", "application/json")
+	var user user
+
+	userData := collection.FindOne(context.Background(), bson.M{"_id": userID, "active": true})
 	err := userData.Decode(&user)
 
 	if err != nil {

@@ -4,8 +4,12 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 
+	apiDebt "github.com/cemtanrikut/go-api-debt/api/debt"
 	apiUser "github.com/cemtanrikut/go-api-debt/api/user"
+
+	"github.com/patrickmn/go-cache"
 
 	"github.com/cemtanrikut/go-api-debt/db"
 	"github.com/cemtanrikut/go-api-debt/helper"
@@ -15,8 +19,9 @@ import (
 
 var client *mongo.Client
 var ctx context.Context
-var userCollection *mongo.Collection
+var userCollection, debtCollection *mongo.Collection
 var router *mux.Router
+var c *cache.Cache
 
 //User handler
 func MuxUserHandler() {
@@ -38,11 +43,14 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	result := apiUser.GetUser(email, w, r, client, userCollection)
 	byteRes := helper.JsonMarshal(result)
 	w.Write(byteRes)
+
+	c = cache.New(5*time.Minute, 5*time.Minute)
+	c.Set("user_id", result.Data[0], cache.NoExpiration)
 }
 
 //Debt Handler
 func MuxDebtHandler() {
-	router, ctx, client, userCollection = db.MongoClient("debt_collection")
+	router, ctx, client, debtCollection = db.MongoClient("debt_collection")
 
 	router.HandleFunc("/api/debt/add", addDebt).Methods(http.MethodPost)
 	router.HandleFunc("/api/debt/update", updateDebt).Methods(http.MethodPost)
@@ -51,7 +59,12 @@ func MuxDebtHandler() {
 }
 
 func addDebt(w http.ResponseWriter, r *http.Request) {
-
+	userID, found := c.Get("user_id")
+	if found {
+		result := apiDebt.AddDebt(w, r, client, debtCollection, userID.(string))
+		byteRes := helper.JsonMarshal(result)
+		w.Write(byteRes)
+	}
 }
 func updateDebt(w http.ResponseWriter, r *http.Request) {
 
