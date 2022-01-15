@@ -24,8 +24,6 @@ func MuxUserHandler() {
 
 	router.HandleFunc("/api/user/signup", signUp).Methods(http.MethodPost)
 	router.HandleFunc("/api/user/{email}", getUser).Methods(http.MethodGet)
-	router.HandleFunc("/api/user/update", updateUser).Methods(http.MethodPost)
-	router.HandleFunc("/api/user/delete/{email}", deleteUser).Methods(http.MethodPost)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
@@ -38,18 +36,6 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 func getUser(w http.ResponseWriter, r *http.Request) {
 	email := mux.Vars(r)["email"]
 	result := apiUser.GetUser(email, w, r, client, userCollection)
-	byteRes := helper.JsonMarshal(result)
-	w.Write(byteRes)
-}
-func updateUser(w http.ResponseWriter, r *http.Request) {
-	result := apiUser.UpdateUser(w, r, userCollection)
-	byteRes := helper.JsonMarshal(result)
-	w.Write(byteRes)
-}
-func deleteUser(w http.ResponseWriter, r *http.Request) {
-	v := mux.Vars(r)
-	email := v["email"]
-	result := apiUser.DeleteUser(email, w, r, userCollection)
 	byteRes := helper.JsonMarshal(result)
 	w.Write(byteRes)
 }
