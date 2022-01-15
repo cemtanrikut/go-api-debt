@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	api "github.com/cemtanrikut/go-api-debt/api/debt"
 	apiDebt "github.com/cemtanrikut/go-api-debt/api/debt"
 	apiUser "github.com/cemtanrikut/go-api-debt/api/user"
 
@@ -67,5 +68,7 @@ func addDebt(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func updateDebt(w http.ResponseWriter, r *http.Request) {
-
+	result := api.UpdateDebt(w, r, debtCollection)
+	byteRes := helper.JsonMarshal(result)
+	w.Write(byteRes)
 }
