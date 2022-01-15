@@ -2,13 +2,6 @@ package api
 
 import "time"
 
-type user struct {
-	name       string  `json:"name"`
-	phone      string  `json:"phone"`
-	mail       string  `json:"mail"`
-	avg_income float32 `json:"avg_income"`
-}
-
 type debt struct {
 	name       string    `json:"name"`
 	typeof     string    `json:"typeof"`
@@ -18,10 +11,6 @@ type debt struct {
 	end_date   time.Time `json:"end_date"`
 	completed  bool      `json:"completed"`
 	active     bool      `json:"active"`
-}
-
-func UserHandler() {
-
 }
 
 func DebtHandler() {
