@@ -42,5 +42,17 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 
 //Debt Handler
 func MuxDebtHandler() {
+	router, ctx, client, userCollection = db.MongoClient("debt_collection")
+
+	router.HandleFunc("/api/debt/add", addDebt).Methods(http.MethodPost)
+	router.HandleFunc("/api/debt/update", updateDebt).Methods(http.MethodPost)
+
+	log.Fatal(http.ListenAndServe(":8080", router))
+}
+
+func addDebt(w http.ResponseWriter, r *http.Request) {
+
+}
+func updateDebt(w http.ResponseWriter, r *http.Request) {
 
 }
