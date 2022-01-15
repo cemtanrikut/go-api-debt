@@ -55,6 +55,8 @@ func MuxDebtHandler() {
 
 	router.HandleFunc("/api/debt/add", addDebt).Methods(http.MethodPost)
 	router.HandleFunc("/api/debt/update", updateDebt).Methods(http.MethodPost)
+	router.HandleFunc("/api/debt/get", getDebtList).Methods(http.MethodPost)
+	router.HandleFunc("/api/debt/get/{debtID}", getDebt).Methods(http.MethodGet)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
@@ -69,6 +71,17 @@ func addDebt(w http.ResponseWriter, r *http.Request) {
 }
 func updateDebt(w http.ResponseWriter, r *http.Request) {
 	result := api.UpdateDebt(w, r, debtCollection)
+	byteRes := helper.JsonMarshal(result)
+	w.Write(byteRes)
+}
+func getDebt(w http.ResponseWriter, r *http.Request) {
+	debtID := mux.Vars(r)["debtID"]
+	result := api.GetDebt(w, r, client, debtCollection, debtID)
+	byteRes := helper.JsonMarshal(result)
+	w.Write(byteRes)
+}
+func getDebtList(w http.ResponseWriter, r *http.Request) {
+	result := api.GetDebtList(w, r, client, debtCollection)
 	byteRes := helper.JsonMarshal(result)
 	w.Write(byteRes)
 }

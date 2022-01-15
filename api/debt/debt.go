@@ -52,6 +52,51 @@ func AddDebt(resp http.ResponseWriter, req *http.Request, client *mongo.Client, 
 
 }
 
+func GetDebt(resp http.ResponseWriter, req *http.Request, client *mongo.Client, collection *mongo.Collection, debtID string) api.Response {
+	resp.Header().Set("Content-Type", "application/json")
+	var debt debt
+
+	debtData := collection.FindOne(context.Background(), bson.M{"_id": debtID, "active": true})
+	err := debtData.Decode(&debt)
+	if err != nil {
+		return helper.ReturnResponse(http.StatusNotFound, "", err.Error())
+	}
+
+	jsonResult, jsonError := json.Marshal(debt)
+	if jsonError != nil {
+		return helper.ReturnResponse(http.StatusInternalServerError, "", err.Error())
+	}
+
+	return helper.ReturnResponse(http.StatusOK, string(jsonResult), "")
+}
+
+func GetDebtList(resp http.ResponseWriter, req *http.Request, client *mongo.Client, collection *mongo.Collection) api.Response {
+	resp.Header().Set("Content-Type", "application/json")
+	var debtMList []primitive.M
+
+	cursor, err := collection.Find(context.Background(), bson.M{"active": true})
+	if err != nil {
+		return helper.ReturnResponse(http.StatusNotFound, "fdsdfgtgsfgssfg", err.Error())
+	}
+
+	for cursor.Next(context.Background()) {
+		var debt bson.M
+		if err = cursor.Decode(&debt); err != nil {
+			return helper.ReturnResponse(http.StatusInternalServerError, "", err.Error())
+		}
+		debtMList = append(debtMList, debt)
+	}
+	defer cursor.Close(context.Background())
+
+	jsonResult, err := json.Marshal(debtMList)
+	if err != nil {
+		return helper.ReturnResponse(http.StatusInternalServerError, "", err.Error())
+	}
+
+	return helper.ReturnResponse(http.StatusOK, string(jsonResult), "")
+
+}
+
 func UpdateDebt(resp http.ResponseWriter, req *http.Request, collection *mongo.Collection) api.Response {
 	resp.Header().Set("Content-Type", "application/json")
 	var debt debt
