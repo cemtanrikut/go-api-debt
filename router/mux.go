@@ -5,7 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	api "github.com/cemtanrikut/go-api-debt/api/user"
+	apiUser "github.com/cemtanrikut/go-api-debt/api/user"
+
 	"github.com/cemtanrikut/go-api-debt/db"
 	"github.com/cemtanrikut/go-api-debt/helper"
 	"github.com/gorilla/mux"
@@ -17,10 +18,10 @@ var ctx context.Context
 var userCollection *mongo.Collection
 var router *mux.Router
 
+//User handler
 func MuxUserHandler() {
 	router, ctx, client, userCollection = db.MongoClient("user_collection")
 
-	router.HandleFunc("/api/user/login", logIn).Methods(http.MethodPost)
 	router.HandleFunc("/api/user/signup", signUp).Methods(http.MethodPost)
 	router.HandleFunc("/api/user/{email}", getUser).Methods(http.MethodGet)
 	router.HandleFunc("/api/user/update", updateUser).Methods(http.MethodPost)
@@ -30,34 +31,30 @@ func MuxUserHandler() {
 }
 
 func signUp(w http.ResponseWriter, r *http.Request) {
-	result := api.SignUp(w, r, client, userCollection)
-	byteRes := helper.JsonMarshal(result)
-	w.Write(byteRes)
-}
-func logIn(w http.ResponseWriter, r *http.Request) {
-	result := api.LogIn(w, r, client, ctx, userCollection)
+	result := apiUser.SignUp(w, r, client, userCollection)
 	byteRes := helper.JsonMarshal(result)
 	w.Write(byteRes)
 }
 func getUser(w http.ResponseWriter, r *http.Request) {
 	email := mux.Vars(r)["email"]
-	result := api.GetUser(email, w, r, client, userCollection)
+	result := apiUser.GetUser(email, w, r, client, userCollection)
 	byteRes := helper.JsonMarshal(result)
 	w.Write(byteRes)
 }
 func updateUser(w http.ResponseWriter, r *http.Request) {
-	result := api.UpdateUser(w, r, userCollection)
+	result := apiUser.UpdateUser(w, r, userCollection)
 	byteRes := helper.JsonMarshal(result)
 	w.Write(byteRes)
 }
 func deleteUser(w http.ResponseWriter, r *http.Request) {
 	v := mux.Vars(r)
 	email := v["email"]
-	result := api.DeleteUser(email, w, r, userCollection)
+	result := apiUser.DeleteUser(email, w, r, userCollection)
 	byteRes := helper.JsonMarshal(result)
 	w.Write(byteRes)
 }
 
+//Debt Handler
 func MuxDebtHandler() {
 
 }
