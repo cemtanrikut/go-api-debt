@@ -72,25 +72,6 @@ func GetUser(email string, resp http.ResponseWriter, req *http.Request, client *
 	return helper.ReturnResponse(http.StatusOK, string(jsonResult), "")
 }
 
-func GetUserById(userID string, resp http.ResponseWriter, req *http.Request, client *mongo.Client, collection *mongo.Collection) api.Response {
-	resp.Header().Set("Content-Type", "application/json")
-	var user user
-
-	userData := collection.FindOne(context.Background(), bson.M{"_id": userID, "active": true})
-	err := userData.Decode(&user)
-
-	if err != nil {
-		return helper.ReturnResponse(http.StatusNotFound, "", err.Error())
-	}
-
-	jsonResult, jsonError := json.Marshal(user)
-	if jsonError != nil {
-		return helper.ReturnResponse(http.StatusInternalServerError, "", err.Error())
-	}
-
-	return helper.ReturnResponse(http.StatusOK, string(jsonResult), "")
-}
-
 func CheckEmail(email string, client *mongo.Client, collection *mongo.Collection) bool {
 	var dbUser user
 	err := collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&dbUser)
